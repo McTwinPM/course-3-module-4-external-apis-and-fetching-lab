@@ -5,22 +5,57 @@
 // - Use fetch() to retrieve data from the OpenWeather API
 // - Handle the API response and parse the JSON
 // - Log the data to the console for testing
+async function fetchWeatherData(city) {
+    const api = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=YOUR_API_KEY&units=metric`;
+    try {
+        const response = await fetch(api);
+        if (!response.ok) {
+            throw new Error('City not found');
+        }
+        const data = await response.json();
+        displayWeather(data);
+    } catch (error) {
+        console.error('Error fetching weather data:', error);
+        displayError(error.message);
+    }
+}
+
 
 // Step 2: Display Weather Data on the Page
 // - Create a function `displayWeather(data)`
 // - Dynamically update the DOM with weather details (e.g., temperature, humidity, weather description)
 // - Ensure the function can handle the data format provided by the API
-
+async function displayWeather(data) {
+    const weatherDisplay = document.getElementById('weather-display');
+    weatherDisplay.innerHTML = `
+        <h2>Location: ${data.name}</h2>
+        <p>Temperature: ${data.main.temp} °C</p>
+        <p>Humidity: ${data.main.humidity}%</p>
+        <p>Description: ${data.weather[0].description}</p>
+    `;
+}
 // Step 3: Handle User Input
 // - Add an event listener to the button to capture user input
 // - Retrieve the value from the input field
 // - Call `fetchWeatherData(city)` with the user-provided city name
+document.addEventListener("click", function (event) {
+    if (event.target.id === 'fetch-weather') {
+        const cityInput = document.getElementById('city-input');
+        const city = cityInput.value.trim();
+        fetchWeatherData(city)
+    }
+    
 
+})
 // Step 4: Implement Error Handling
 // - Create a function `displayError(message)`
 // - Handle invalid city names or network issues
 // - Dynamically display error messages in a dedicated section of the page
-
+async function displayError(message){
+    const errorElement = document.getElementById('error-message');
+    errorElement.textContent = message;
+    errorElement.classList.add('error');
+}
 // Step 5: Optimize Code for Maintainability
 // - Refactor repetitive code into reusable functions
 // - Use async/await for better readability and to handle asynchronous operations
