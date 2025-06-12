@@ -6,7 +6,7 @@
 // - Handle the API response and parse the JSON
 // - Log the data to the console for testing
 async function fetchWeatherData(city) {
-    const api = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=YOUR_API_KEY&units=metric`;
+    const api = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=4dca6b14b9cba5504e6ff7b4323aa2ae`;
     try {
         const response = await fetch(api);
         if (!response.ok) {
@@ -14,9 +14,11 @@ async function fetchWeatherData(city) {
         }
         const data = await response.json();
         displayWeather(data);
+        return data;
     } catch (error) {
         console.error('Error fetching weather data:', error);
         displayError(error.message);
+        throw error;
     }
 }
 
@@ -25,11 +27,15 @@ async function fetchWeatherData(city) {
 // - Create a function `displayWeather(data)`
 // - Dynamically update the DOM with weather details (e.g., temperature, humidity, weather description)
 // - Ensure the function can handle the data format provided by the API
-async function displayWeather(data) {
+function displayWeather(data) {
     const weatherDisplay = document.getElementById('weather-display');
+    if (!weatherDisplay) {
+        console.error('Weather display element not found');
+        return;
+    }
     weatherDisplay.innerHTML = `
         <h2>Location: ${data.name}</h2>
-        <p>Temperature: ${data.main.temp} °C</p>
+        <p>Temperature: ${(data.main.temp - 273.15).toFixed(0)}°C</p>
         <p>Humidity: ${data.main.humidity}%</p>
         <p>Description: ${data.weather[0].description}</p>
     `;
@@ -51,10 +57,14 @@ document.addEventListener("click", function (event) {
 // - Create a function `displayError(message)`
 // - Handle invalid city names or network issues
 // - Dynamically display error messages in a dedicated section of the page
-async function displayError(message){
-    const errorElement = document.getElementById('error-message');
-    errorElement.textContent = message;
-    errorElement.classList.add('error');
+function displayError(message){
+    const errorMessage = document.getElementById('error-message');
+    if (!errorMessage) {
+        console.error('Error message element not found');
+        return;
+    }
+    errorMessage.classList.remove('hidden');
+    errorMessage.textContent = `${message}`;
 }
 // Step 5: Optimize Code for Maintainability
 // - Refactor repetitive code into reusable functions
@@ -70,3 +80,8 @@ async function displayError(message){
 
 // Event Listener for Fetch Button
 // - Attach the main event listener to the button to start the process
+module.exports = {
+    fetchWeatherData,
+    displayWeather,
+    displayError
+};
